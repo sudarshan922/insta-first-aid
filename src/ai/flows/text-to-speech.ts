@@ -59,7 +59,9 @@ const textToSpeechFlow = ai.defineFlow(
     outputSchema: TextToSpeechOutputSchema,
   },
   async (input) => {
-    const voice = input.language === 'hi-IN' ? 'hi-IN-Standard-A' : 'en-US-Standard-B';
+    // Select a voice based on the language
+    const voiceName = input.language === 'hi-IN' ? 'hi-IN-Standard-A' : 'en-US-Standard-B';
+
     const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       config: {
@@ -67,13 +69,14 @@ const textToSpeechFlow = ai.defineFlow(
         speechConfig: {
           voiceConfig: {
             prebuiltVoiceConfig: {
-                voiceName: voice,
-            }
+              voiceName: voiceName,
+            },
           },
         },
       },
       prompt: input.text,
     });
+
     if (!media) {
       throw new Error('No audio was generated.');
     }
