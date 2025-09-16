@@ -102,16 +102,16 @@ export function FirstAidInstructions({
     <Card className="mt-8 animate-in fade-in-50 duration-500 shadow-lg border-primary/20">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="font-headline text-2xl">First Aid Steps</CardTitle>
-        <Button onClick={handlePlayPause} size="lg" disabled={isAudioLoading || !audioDataUri}>
+        <Button onClick={handlePlayPause} disabled={isAudioLoading || !audioDataUri}>
           {isAudioLoading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Generating Audio...
+              Generating...
             </>
           ) : isPlaying ? (
             <>
               <Pause className="mr-2 h-5 w-5" />
-              Pause Audio
+              Pause
             </>
           ) : (
             <>
