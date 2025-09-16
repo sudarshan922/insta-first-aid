@@ -26,9 +26,6 @@ import { SupportedLanguageSchema } from '@/ai/schemas/text-to-speech';
 const languages: { value: SupportedLanguage; label: string }[] = [
   { value: 'en-US', label: 'English' },
   { value: 'hi-IN', label: 'Hindi' },
-  { value: 'mr-IN', label: 'Marathi' },
-  { value: 'kn-IN', label: 'Kannada' },
-  { value: 'kok-IN', label: 'Konkani' },
 ];
 
 const emergencyFormSchema = z.object({
