@@ -59,13 +59,16 @@ const textToSpeechFlow = ai.defineFlow(
     outputSchema: TextToSpeechOutputSchema,
   },
   async (input) => {
+    const voice = input.language === 'hi-IN' ? 'hi-IN-Standard-A' : 'en-US-Standard-B';
     const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            languageCode: input.language,
+            prebuiltVoiceConfig: {
+                voiceName: voice,
+            }
           },
         },
       },
