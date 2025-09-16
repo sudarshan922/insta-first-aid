@@ -60,7 +60,7 @@ const textToSpeechFlow = ai.defineFlow(
   },
   async (input) => {
     // Select a voice based on the language
-    const voiceName = 'zephyr';
+    const voiceName = 'Algenib';
 
     const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
