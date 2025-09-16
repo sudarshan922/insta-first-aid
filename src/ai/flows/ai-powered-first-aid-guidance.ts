@@ -25,7 +25,7 @@ const AiPoweredFirstAidGuidanceOutputSchema = z.object({
   instructions: z
     .string()
     .describe(
-      'Step-by-step first aid instructions based on the provided keywords.'
+      'Step-by-step first aid instructions based on the provided keywords, formatted in Markdown.'
     ),
 });
 export type AiPoweredFirstAidGuidanceOutput = z.infer<typeof AiPoweredFirstAidGuidanceOutputSchema>;
@@ -41,13 +41,17 @@ const firstAidPrompt = ai.definePrompt({
   input: {schema: AiPoweredFirstAidGuidanceInputSchema},
   output: {schema: AiPoweredFirstAidGuidanceOutputSchema},
   prompt: `You are an expert first aid responder. A user will provide keywords related to a medical emergency.
-Your job is to provide clear, step-by-step first aid instructions.
-Reason step by step about the best course of action, and decide when it is appropriate to include a piece of information.
-Make sure the instructions are easy to understand and follow.
+Your job is to provide clear, step-by-step first aid instructions formatted in simple Markdown.
 
-Translate the instructions into the following language: {{{language}}}.
+- Use '##' for main section titles (e.g., '## Key Steps').
+- Use '###' for step titles (e.g., '### Step 1: Check for Danger').
+- Use plain text for the description of each step.
+- Be clear, concise, and easy to understand.
+- Always include a '## Disclaimer' section at the end, advising the user to call emergency services.
 
-Keywords: {{{keywords}}}`,
+Translate all of your output into the following language: {{{language}}}.
+
+Emergency Keywords: {{{keywords}}}`,
 });
 
 const aiPoweredFirstAidGuidanceFlow = ai.defineFlow(

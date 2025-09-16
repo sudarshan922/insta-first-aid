@@ -8,7 +8,7 @@ import { detectEmergencyKeywords } from '@/ai/flows/emergency-keyword-detection'
 import { aiPoweredFirstAidGuidance } from '@/ai/flows/ai-powered-first-aid-guidance';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { FirstAidInstructions } from './first-aid-instructions';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -87,16 +87,17 @@ export function EmergencyForm() {
   return (
     <div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
+                 <FormLabel className="text-base">Emergency Description</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="e.g., 'A person has collapsed and is not breathing' or 'Severe burn on the arm'"
-                    className="min-h-[120px] text-base"
+                    className="min-h-[140px] text-base"
                     {...field}
                   />
                 </FormControl>
@@ -105,21 +106,22 @@ export function EmergencyForm() {
             )}
           />
 
-          <div className="flex flex-wrap items-center gap-4">
-            <FormField
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+             <FormField
               control={form.control}
               name="language"
               render={({ field }) => (
                 <FormItem>
+                   <FormLabel className="text-base">Language</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                     <FormControl>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-full text-base h-12">
                         <SelectValue placeholder="Select Language" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {languages.map((lang) => (
-                        <SelectItem key={lang.value} value={lang.value}>
+                        <SelectItem key={lang.value} value={lang.value} className="text-base">
                           {lang.label}
                         </SelectItem>
                       ))}
@@ -129,16 +131,18 @@ export function EmergencyForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" size="lg" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                'Get First Aid Steps'
-              )}
-            </Button>
+             <div className="sm:self-end">
+                <Button type="submit" size="lg" disabled={isLoading} className="w-full h-12 text-base">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Get First Aid Steps'
+                  )}
+                </Button>
+            </div>
           </div>
         </form>
       </Form>

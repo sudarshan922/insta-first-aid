@@ -5,10 +5,10 @@ import { Logo } from '@/components/logo';
 
 export function Header() {
   return (
-    <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-50">
+    <header className="bg-background/80 backdrop-blur-sm border-b sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between p-4 h-16">
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold text-foreground transition-colors hover:text-primary">
-          <Logo className="h-7 w-7 text-primary" />
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold text-foreground transition-colors hover:text-primary/80">
+          <Logo className="h-8 w-8 text-primary" />
           <span className="font-headline">FirstStep</span>
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">

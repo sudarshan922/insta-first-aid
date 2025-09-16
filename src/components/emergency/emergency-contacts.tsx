@@ -3,31 +3,34 @@ import { Button } from '@/components/ui/button';
 import { Phone, Shield, Building, Flame } from 'lucide-react';
 
 const emergencyContacts = [
-  { name: 'Ambulance', number: '108', icon: <Phone /> },
-  { name: 'National Emergency', number: '112', icon: <Shield /> },
-  { name: 'Police', number: '100', icon: <Building /> },
-  { name: 'Fire', number: '101', icon: <Flame /> },
+  { name: 'Ambulance', number: '108', icon: <Phone className="h-6 w-6" /> },
+  { name: 'National Emergency', number: '112', icon: <Shield className="h-6 w-6" /> },
+  { name: 'Police', number: '100', icon: <Building className="h-6 w-6" /> },
+  { name: 'Fire', number: '101', icon: <Flame className="h-6 w-6" /> },
 ];
 
 export function EmergencyContacts() {
   return (
-    <Card className="bg-card/50">
+    <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Quick Contacts</CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="text-muted-foreground mb-4">
+          For critical emergencies, call one of these numbers directly.
+        </p>
         <div className="grid grid-cols-2 gap-4">
           {emergencyContacts.map((contact) => (
             <Button
               key={contact.name}
-              variant="destructive"
-              className="h-20 flex-col gap-1 text-base"
+              variant="outline"
+              className="h-24 flex-col gap-2 text-base font-semibold border-2 hover:bg-destructive/5 hover:border-destructive"
               asChild
             >
               <a href={`tel:${contact.number}`}>
                 {contact.icon}
                 <span>{contact.name}</span>
-                <span className="text-sm opacity-80">{contact.number}</span>
+                <span className="text-sm font-normal text-muted-foreground">{contact.number}</span>
               </a>
             </Button>
           ))}
