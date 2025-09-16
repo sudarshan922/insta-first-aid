@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview This file defines a streamlined Genkit flow for providing AI-powered first aid guidance.
- * It generates both text instructions and audio in parallel to improve performance.
+ * It generates both text instructions and audio to improve user experience.
  *
  * - streamlinedFirstAid - The main function to trigger the flow.
  */
@@ -30,24 +30,17 @@ const streamlinedFirstAidFlow = ai.defineFlow(
     outputSchema: StreamlinedFirstAidOutputSchema,
   },
   async (input) => {
-    // 1. Kick off the text generation.
-    const guidancePromise = aiPoweredFirstAidGuidance(input);
+    // 1. Generate the text-based first aid instructions.
+    const guidanceResult = await aiPoweredFirstAidGuidance(input);
 
-    // 2. Immediately kick off the speech generation with the same keywords.
-    // The TTS model is smart enough to generate relevant audio even without the final formatted text.
-    // We'll clean the keywords just in case.
-    const speechPromise = textToSpeech({
-      text: input.keywords.replace(/#|\*/g, ''),
+    // 2. Use the generated instructions to create the audio.
+    // We strip markdown for cleaner speech.
+    const speechResult = await textToSpeech({
+      text: guidanceResult.instructions.replace(/#|\*/g, ''),
       language: input.language,
     });
 
-    // 3. Await both promises in parallel.
-    const [guidanceResult, speechResult] = await Promise.all([
-      guidancePromise,
-      speechPromise,
-    ]);
-
-    // 4. Return both results.
+    // 3. Return both results.
     return {
       instructions: guidanceResult.instructions,
       audioDataUri: speechResult.audioDataUri,
