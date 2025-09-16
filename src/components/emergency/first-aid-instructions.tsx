@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pause, Play, Volume2 } from 'lucide-react';
@@ -9,69 +8,39 @@ import { Pause, Play, Volume2 } from 'lucide-react';
 type FirstAidInstructionsProps = {
   instructions: string;
   audioDataUri: string;
-  language: SupportedLanguage;
-  autoPlay: boolean;
 };
 
 export function FirstAidInstructions({
   instructions,
   audioDataUri,
-  language,
-  autoPlay,
 }: FirstAidInstructionsProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Initialize audio element
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.onended = () => setIsPlaying(false);
-    }
-    
-    const audio = audioRef.current;
-    
-    // Update the source if it has changed
-    if (audio.src !== audioDataUri) {
-        audio.src = audioDataUri;
-    }
-
-    // Handle autoPlay
-    if (autoPlay) {
-      // We only want to play if it's not already playing due to a previous render
-      if (audio.paused) {
-         audio.play().catch(console.error); // Autoplay can be blocked
-         setIsPlaying(true);
-      }
-    } else {
-        // If autoPlay is false, make sure it's paused.
-        if (!audio.paused) {
-            audio.pause();
-            setIsPlaying(false);
-        }
-    }
+    // Initialize audio element on component mount
+    audioRef.current = new Audio(audioDataUri);
+    audioRef.current.onended = () => setIsPlaying(false);
 
     // Cleanup on unmount
     return () => {
-      audio.pause();
-      setIsPlaying(false);
+      audioRef.current?.pause();
     };
-  // We only want to re-run this logic if these specific props change.
-  // We've removed instructions and language as they don't directly control audio playback.
-  }, [audioDataUri, autoPlay]);
+  }, [audioDataUri]);
 
 
   const handlePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current?.pause();
-      setIsPlaying(false);
-    } else {
-      // Ensure src is set before playing, especially on first manual play
-      if(audioRef.current && audioRef.current.src !== audioDataUri) {
-        audioRef.current.src = audioDataUri;
-      }
-      audioRef.current?.play().catch(console.error);
-      setIsPlaying(true);
+    if (audioRef.current) {
+        if (isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+        } else {
+            audioRef.current.play().catch(e => {
+                console.error("Audio playback failed:", e);
+                // Optionally show a toast to the user
+            });
+            setIsPlaying(true);
+        }
     }
   };
 

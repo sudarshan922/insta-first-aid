@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
 import { SupportedLanguageSchema } from '@/ai/schemas/text-to-speech';
 
@@ -35,7 +34,6 @@ const emergencyFormSchema = z.object({
     message: 'Please describe the situation in at least 10 characters.',
   }),
   language: SupportedLanguageSchema,
-  autoPlayAudio: z.boolean(),
 });
 
 type EmergencyFormValues = z.infer<typeof emergencyFormSchema>;
@@ -44,7 +42,6 @@ type ResultState = {
   isEmergency: boolean;
   guidance?: StreamlinedFirstAidOutput;
   language: SupportedLanguage;
-  autoPlay: boolean;
 };
 
 export function EmergencyForm() {
@@ -58,7 +55,6 @@ export function EmergencyForm() {
     defaultValues: {
       description: '',
       language: 'en-US',
-      autoPlayAudio: true,
     },
   });
 
@@ -79,10 +75,9 @@ export function EmergencyForm() {
           isEmergency: true,
           guidance: guidanceResult,
           language: data.language,
-          autoPlay: data.autoPlayAudio,
         });
       } else {
-        setResult({ isEmergency: false, language: data.language, autoPlay: false });
+        setResult({ isEmergency: false, language: data.language });
       }
     } catch (e) {
       console.error(e);
@@ -144,24 +139,6 @@ export function EmergencyForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="autoPlayAudio"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 mt-6 sm:mt-0 shadow-sm bg-card h-12">
-                  <FormLabel className="text-base">
-                    Auto-play Audio
-                  </FormLabel>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
           </div>
            <Button type="submit" size="lg" disabled={isLoading} className="w-full h-14 text-lg mt-6">
               {isLoading ? (
@@ -196,8 +173,6 @@ export function EmergencyForm() {
         <FirstAidInstructions
           instructions={result.guidance.instructions}
           audioDataUri={result.guidance.audioDataUri}
-          language={result.language}
-          autoPlay={result.autoPlay}
         />
       )}
     </div>
