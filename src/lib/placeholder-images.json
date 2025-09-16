@@ -3,27 +3,27 @@
   "placeholderImages": [
     {
       "id": "cpr-guide",
-      "description": "Illustration for CPR guide",
-      "imageUrl": "https://picsum.photos/seed/cpr/600/400",
-      "imageHint": "heart rescue"
+      "description": "A person demonstrating CPR on a mannequin.",
+      "imageUrl": "https://picsum.photos/seed/cpr-training/600/400",
+      "imageHint": "cpr first-aid"
     },
     {
       "id": "burns-guide",
-      "description": "Illustration for burns guide",
-      "imageUrl": "https://picsum.photos/seed/burns/600/400",
-      "imageHint": "fire safety"
+      "description": "Cooling a minor burn with running water.",
+      "imageUrl": "https://picsum.photos/seed/burn-care/600/400",
+      "imageHint": "burn treatment"
     },
     {
       "id": "choking-guide",
-      "description": "Illustration for choking guide",
-      "imageUrl": "https://picsum.photos/seed/choking/600/400",
-      "imageHint": "person choking"
+      "description": "A person performing the Heimlich maneuver on someone who is choking.",
+      "imageUrl": "https://picsum.photos/seed/heimlich/600/400",
+      "imageHint": "choking assistance"
     },
     {
       "id": "bleeding-guide",
-      "description": "Illustration for bleeding guide",
-      "imageUrl": "https://picsum.photos/seed/bleeding/600/400",
-      "imageHint": "first-aid kit"
+      "description": "A person applying pressure to a bleeding wound with a clean cloth.",
+      "imageUrl": "https://picsum.photos/seed/stop-bleeding/600/400",
+      "imageHint": "wound care"
     }
   ]
 }
