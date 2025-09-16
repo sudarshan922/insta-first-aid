@@ -23,39 +23,53 @@ export function FirstAidInstructions({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Create and configure the audio element when the component mounts
-    const audio = new Audio(audioDataUri);
-    audio.onended = () => setIsPlaying(false);
-    audioRef.current = audio;
-
-    if (autoPlay) {
-      audio.play().catch(console.error); // Autoplay might be blocked by the browser
-      setIsPlaying(true);
+    // Initialize audio element
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+    
+    const audio = audioRef.current;
+    
+    // Update the source if it has changed
+    if (audio.src !== audioDataUri) {
+        audio.src = audioDataUri;
     }
 
-    // Cleanup audio on component unmount
+    // Handle autoPlay
+    if (autoPlay) {
+      // We only want to play if it's not already playing due to a previous render
+      if (audio.paused) {
+         audio.play().catch(console.error); // Autoplay can be blocked
+         setIsPlaying(true);
+      }
+    } else {
+        // If autoPlay is false, make sure it's paused.
+        if (!audio.paused) {
+            audio.pause();
+            setIsPlaying(false);
+        }
+    }
+
+    // Cleanup on unmount
     return () => {
       audio.pause();
-      audioRef.current = null;
+      setIsPlaying(false);
     };
-  }, [audioDataUri, autoPlay]); // Rerun when audio data changes
+  // We only want to re-run this logic if these specific props change.
+  // We've removed instructions and language as they don't directly control audio playback.
+  }, [audioDataUri, autoPlay]);
 
-  // When language or instructions change, update the audio source
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.src = audioDataUri;
-      setIsPlaying(autoPlay);
-      if(autoPlay) {
-          audioRef.current.play().catch(console.error)
-      }
-    }
-  }, [instructions, language, audioDataUri, autoPlay]);
 
   const handlePlayPause = () => {
     if (isPlaying) {
       audioRef.current?.pause();
       setIsPlaying(false);
     } else {
+      // Ensure src is set before playing, especially on first manual play
+      if(audioRef.current && audioRef.current.src !== audioDataUri) {
+        audioRef.current.src = audioDataUri;
+      }
       audioRef.current?.play().catch(console.error);
       setIsPlaying(true);
     }
