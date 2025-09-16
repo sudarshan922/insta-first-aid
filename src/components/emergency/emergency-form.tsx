@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { detectEmergencyKeywords } from '@/ai/flows/emergency-keyword-detection';
-import { aiPoweredFirstAidGuidance } from '@/ai/flows/ai-powered-first-aid-guidance';
+import { streamlinedFirstAid } from '@/ai/flows/streamlined-first-aid-flow';
+import type { StreamlinedFirstAidOutput } from '@/ai/schemas/streamlined-first-aid';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
 import { SupportedLanguageSchema } from '@/ai/schemas/text-to-speech';
 
@@ -33,14 +35,22 @@ const emergencyFormSchema = z.object({
     message: 'Please describe the situation in at least 10 characters.',
   }),
   language: SupportedLanguageSchema,
+  autoPlayAudio: z.boolean(),
 });
 
 type EmergencyFormValues = z.infer<typeof emergencyFormSchema>;
 
+type ResultState = {
+  isEmergency: boolean;
+  guidance?: StreamlinedFirstAidOutput;
+  language: SupportedLanguage;
+  autoPlay: boolean;
+};
+
 export function EmergencyForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ isEmergency: boolean; instructions?: string; language: SupportedLanguage } | null>(null);
+  const [result, setResult] = useState<ResultState | null>(null);
   const { toast } = useToast();
 
   const form = useForm<EmergencyFormValues>({
@@ -48,6 +58,7 @@ export function EmergencyForm() {
     defaultValues: {
       description: '',
       language: 'en-US',
+      autoPlayAudio: true,
     },
   });
 
@@ -60,13 +71,18 @@ export function EmergencyForm() {
       const emergencyResult = await detectEmergencyKeywords({ text: data.description });
 
       if (emergencyResult.isEmergency && emergencyResult.keywords.length > 0) {
-        const guidanceResult = await aiPoweredFirstAidGuidance({
+        const guidanceResult = await streamlinedFirstAid({
           keywords: emergencyResult.keywords.join(', '),
           language: data.language,
         });
-        setResult({ isEmergency: true, instructions: guidanceResult.instructions, language: data.language });
+        setResult({
+          isEmergency: true,
+          guidance: guidanceResult,
+          language: data.language,
+          autoPlay: data.autoPlayAudio,
+        });
       } else {
-        setResult({ isEmergency: false, language: data.language });
+        setResult({ isEmergency: false, language: data.language, autoPlay: false });
       }
     } catch (e) {
       console.error(e);
@@ -103,7 +119,7 @@ export function EmergencyForm() {
             )}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
              <FormField
               control={form.control}
               name="language"
@@ -128,19 +144,35 @@ export function EmergencyForm() {
                 </FormItem>
               )}
             />
-             <div className="sm:self-end">
-                <Button type="submit" size="lg" disabled={isLoading} className="w-full h-12 text-base">
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    'Get First Aid Steps'
-                  )}
-                </Button>
-            </div>
+            <FormField
+              control={form.control}
+              name="autoPlayAudio"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 mt-6 sm:mt-0 shadow-sm bg-card h-12">
+                  <FormLabel className="text-base">
+                    Auto-play Audio
+                  </FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
+           <Button type="submit" size="lg" disabled={isLoading} className="w-full h-14 text-lg mt-6">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Analyzing & Generating...
+                </>
+              ) : (
+                'Get First Aid Steps'
+              )}
+            </Button>
         </form>
       </Form>
 
@@ -160,8 +192,13 @@ export function EmergencyForm() {
         </Alert>
       )}
 
-      {result?.isEmergency && result.instructions && (
-        <FirstAidInstructions instructions={result.instructions} language={result.language} />
+      {result?.isEmergency && result.guidance && (
+        <FirstAidInstructions
+          instructions={result.guidance.instructions}
+          audioDataUri={result.guidance.audioDataUri}
+          language={result.language}
+          autoPlay={result.autoPlay}
+        />
       )}
     </div>
   );
