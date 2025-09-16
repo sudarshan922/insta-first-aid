@@ -22,31 +22,33 @@ export default function GuidesPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {guides.map((guide) => (
           <Link href={`/guides/${guide.slug}`} key={guide.slug} className="group">
-            <Card className="h-full transition-all duration-300 group-hover:border-primary group-hover:shadow-lg">
-              <div className="grid md:grid-cols-3">
-                 <div className="md:col-span-1 h-40 md:h-full relative overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
-                    {guide.image && (
-                      <Image
-                        src={guide.image.imageUrl}
-                        alt={guide.image.description}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        data-ai-hint={guide.image.imageHint}
-                      />
-                    )}
-                 </div>
-                 <div className="md:col-span-2">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <guide.icon className="h-8 w-8 text-primary" />
+            <Card className="h-full transition-all duration-300 group-hover:border-primary group-hover:shadow-lg flex flex-col md:flex-row">
+              <div className="relative w-full md:w-1/3 h-40 md:h-auto flex-shrink-0">
+                  {guide.image && (
+                    <Image
+                      src={guide.image.imageUrl}
+                      alt={guide.image.description}
+                      fill
+                      className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none transition-transform duration-300 group-hover:scale-105"
+                      data-ai-hint={guide.image.imageHint}
+                    />
+                  )}
+              </div>
+              <div className="flex flex-col flex-grow">
+                <CardHeader className="flex-grow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-3">
+                      <guide.icon className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
+                      <div>
                         <CardTitle className="font-headline text-xl">{guide.title}</CardTitle>
+                        <CardDescription className="pt-2">{guide.description}</CardDescription>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
                     </div>
-                    <CardDescription className="pt-2">{guide.description}</CardDescription>
-                  </CardHeader>
-                 </div>
+                  </div>
+                </CardHeader>
+                <div className="p-6 pt-0 mt-auto self-end">
+                    <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
               </div>
             </Card>
           </Link>

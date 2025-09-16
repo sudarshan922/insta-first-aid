@@ -24,13 +24,13 @@ export function EmergencyContacts() {
             <Button
               key={contact.name}
               variant="outline"
-              className="h-24 flex-col gap-2 text-base font-semibold border-2 hover:bg-destructive/5 hover:border-destructive"
+              className="h-24 flex-col justify-center items-center gap-1 p-2 text-base font-semibold border-2 hover:bg-destructive/5 hover:border-destructive text-center"
               asChild
             >
               <a href={`tel:${contact.number}`}>
                 {contact.icon}
-                <span>{contact.name}</span>
-                <span className="text-sm font-normal text-muted-foreground">{contact.number}</span>
+                <span className="text-sm sm:text-base leading-tight">{contact.name}</span>
+                <span className="text-xs font-normal text-muted-foreground">{contact.number}</span>
               </a>
             </Button>
           ))}
