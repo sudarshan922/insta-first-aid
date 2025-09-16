@@ -30,30 +30,19 @@ const streamlinedFirstAidFlow = ai.defineFlow(
     outputSchema: StreamlinedFirstAidOutputSchema,
   },
   async (input) => {
-    // 1. Generate the text-based instructions first.
+    // 1. Generate the text-based instructions.
     const guidanceResult = await aiPoweredFirstAidGuidance(input);
     const instructions = guidanceResult.instructions;
 
-    // 2. Asynchronously generate the audio for the instructions.
-    // We don't await this promise here, we do it in Promise.all below.
-    const speechPromise = textToSpeech({
+    // 2. In parallel, generate the audio for the instructions.
+    const speechResult = await textToSpeech({
       text: instructions.replace(/#|\*/g, ''), // Remove markdown for cleaner speech
       language: input.language,
     });
     
-    // 3. This is a bit of a trick. We already have the text,
-    // so we can resolve that part of the promise immediately.
-    const instructionPromise = Promise.resolve({ instructions });
-
-    // 4. Wait for both text and audio to be ready.
-    // The text promise will resolve instantly. The audio will take longer.
-    const [instructionResult, speechResult] = await Promise.all([
-        instructionPromise,
-        speechPromise,
-    ]);
-
+    // 3. Return both results.
     return {
-      instructions: instructionResult.instructions,
+      instructions: instructions,
       audioDataUri: speechResult.audioDataUri,
     };
   }
