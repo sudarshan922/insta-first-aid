@@ -1,3 +1,29 @@
+
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "cpr-guide",
+      "description": "Illustration for CPR guide",
+      "imageUrl": "https://picsum.photos/seed/cpr/600/400",
+      "imageHint": "heart rescue"
+    },
+    {
+      "id": "burns-guide",
+      "description": "Illustration for burns guide",
+      "imageUrl": "https://picsum.photos/seed/burns/600/400",
+      "imageHint": "fire safety"
+    },
+    {
+      "id": "choking-guide",
+      "description": "Illustration for choking guide",
+      "imageUrl": "https://picsum.photos/seed/choking/600/400",
+      "imageHint": "person choking"
+    },
+    {
+      "id": "bleeding-guide",
+      "description": "Illustration for bleeding guide",
+      "imageUrl": "https://picsum.photos/seed/bleeding/600/400",
+      "imageHint": "first-aid kit"
+    }
+  ]
 }
