@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { detectEmergencyKeywords } from '@/ai/flows/emergency-keyword-detection';
-import { streamlinedFirstAid } from '@/ai/flows/streamlined-first-aid-flow';
+import { aiPoweredFirstAidGuidance } from '@/ai/flows/ai-powered-first-aid-guidance';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 import type { StreamlinedFirstAidOutput } from '@/ai/schemas/streamlined-first-aid';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,7 +41,7 @@ type EmergencyFormValues = z.infer<typeof emergencyFormSchema>;
 
 type ResultState = {
   isEmergency: boolean;
-  guidance?: StreamlinedFirstAidOutput;
+  instructions?: string;
   language: SupportedLanguage;
 };
 
@@ -48,6 +49,8 @@ export function EmergencyForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResultState | null>(null);
+  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<EmergencyFormValues>({
@@ -62,20 +65,41 @@ export function EmergencyForm() {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setAudioDataUri(null);
+    setIsAudioLoading(false);
 
     try {
       const emergencyResult = await detectEmergencyKeywords({ text: data.description });
 
       if (emergencyResult.isEmergency && emergencyResult.keywords.length > 0) {
-        const guidanceResult = await streamlinedFirstAid({
+        // First, get the text guidance
+        const guidanceResult = await aiPoweredFirstAidGuidance({
           keywords: emergencyResult.keywords.join(', '),
           language: data.language,
         });
+
         setResult({
           isEmergency: true,
-          guidance: guidanceResult,
+          instructions: guidanceResult.instructions,
           language: data.language,
         });
+        setIsAudioLoading(true);
+
+        // Then, generate audio in the background
+        textToSpeech({
+          text: guidanceResult.instructions.replace(/#|\*/g, ''),
+          language: data.language,
+        })
+          .then((speechResult) => {
+            setAudioDataUri(speechResult.audioDataUri);
+          })
+          .catch((e) => {
+            console.error('Audio generation failed:', e);
+            // Don't show a toast for this, as it's a non-critical background task
+          })
+          .finally(() => {
+            setIsAudioLoading(false);
+          });
       } else {
         setResult({ isEmergency: false, language: data.language });
       }
@@ -169,10 +193,11 @@ export function EmergencyForm() {
         </Alert>
       )}
 
-      {result?.isEmergency && result.guidance && (
+      {result?.isEmergency && result.instructions && (
         <FirstAidInstructions
-          instructions={result.guidance.instructions}
-          audioDataUri={result.guidance.audioDataUri}
+          instructions={result.instructions}
+          audioDataUri={audioDataUri}
+          isAudioLoading={isAudioLoading}
         />
       )}
     </div>

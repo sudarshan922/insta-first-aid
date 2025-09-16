@@ -3,28 +3,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, Volume2 } from 'lucide-react';
+import { Pause, Play, Volume2, Loader2 } from 'lucide-react';
 
 type FirstAidInstructionsProps = {
   instructions: string;
-  audioDataUri: string;
+  audioDataUri: string | null;
+  isAudioLoading: boolean;
 };
 
 export function FirstAidInstructions({
   instructions,
   audioDataUri,
+  isAudioLoading,
 }: FirstAidInstructionsProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Initialize audio element on component mount
-    audioRef.current = new Audio(audioDataUri);
-    audioRef.current.onended = () => setIsPlaying(false);
-
-    // Cleanup on unmount
+    if (audioDataUri) {
+      audioRef.current = new Audio(audioDataUri);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+    
+    // Cleanup on unmount or when new audio comes in
     return () => {
-      audioRef.current?.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
     };
   }, [audioDataUri]);
 
@@ -37,7 +43,6 @@ export function FirstAidInstructions({
         } else {
             audioRef.current.play().catch(e => {
                 console.error("Audio playback failed:", e);
-                // Optionally show a toast to the user
             });
             setIsPlaying(true);
         }
@@ -93,13 +98,15 @@ export function FirstAidInstructions({
     <Card className="mt-8 animate-in fade-in-50 duration-500 shadow-lg border-primary/20">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="font-headline text-2xl">First Aid Steps</CardTitle>
-        <Button onClick={handlePlayPause} size="lg">
-          {isPlaying ? (
+        <Button onClick={handlePlayPause} size="lg" disabled={!audioDataUri}>
+          {isAudioLoading ? (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          ) : isPlaying ? (
             <Pause className="mr-2 h-5 w-5" />
           ) : (
             <Volume2 className="mr-2 h-5 w-5" />
           )}
-          {isPlaying ? 'Pause Audio' : 'Play Audio'}
+          {isAudioLoading ? 'Generating...' : isPlaying ? 'Pause Audio' : 'Play Audio'}
         </Button>
       </CardHeader>
       <CardContent className="prose prose-lg max-w-none text-foreground space-y-4">
