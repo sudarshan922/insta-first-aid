@@ -9,6 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { SupportedLanguageSchema } from '@/ai/schemas/text-to-speech';
 
 const AiPoweredFirstAidGuidanceInputSchema = z.object({
   keywords: z
@@ -16,6 +17,7 @@ const AiPoweredFirstAidGuidanceInputSchema = z.object({
     .describe(
       'Emergency-related keywords or a description of the situation (e.g., chest pain, bleeding).'
     ),
+    language: SupportedLanguageSchema.describe('The language for the output instructions.'),
 });
 export type AiPoweredFirstAidGuidanceInput = z.infer<typeof AiPoweredFirstAidGuidanceInputSchema>;
 
@@ -42,6 +44,8 @@ const firstAidPrompt = ai.definePrompt({
 Your job is to provide clear, step-by-step first aid instructions.
 Reason step by step about the best course of action, and decide when it is appropriate to include a piece of information.
 Make sure the instructions are easy to understand and follow.
+
+Translate the instructions into the following language: {{{language}}}.
 
 Keywords: {{{keywords}}}`,
 });

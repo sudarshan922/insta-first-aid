@@ -7,33 +7,17 @@ import {
 import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2, Pause, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type FirstAidInstructionsProps = {
   instructions: string;
+  language: SupportedLanguage;
 };
 
-const languages: { value: SupportedLanguage; label: string }[] = [
-  { value: 'en-US', label: 'English' },
-  { value: 'hi-IN', label: 'Hindi' },
-  { value: 'mr-IN', label: 'Marathi' },
-  { value: 'kn-IN', label: 'Kannada' },
-  { value: 'kok-IN', label: 'Konkani' },
-];
-
-export function FirstAidInstructions({ instructions }: FirstAidInstructionsProps) {
+export function FirstAidInstructions({ instructions, language }: FirstAidInstructionsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<SupportedLanguage>('en-US');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
@@ -46,6 +30,17 @@ export function FirstAidInstructions({ instructions }: FirstAidInstructionsProps
       }
     };
   }, []);
+  
+  // When language or instructions change, stop playing audio and clear the audio source
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  }, [instructions, language]);
+
 
   const handlePlayPause = async () => {
     if (isPlaying) {
@@ -64,7 +59,7 @@ export function FirstAidInstructions({ instructions }: FirstAidInstructionsProps
     try {
       const result = await textToSpeech({
         text: instructions.replace(/\*/g, ''),
-        language: selectedLanguage,
+        language: language,
       });
 
       if (!audioRef.current) {
@@ -116,29 +111,6 @@ export function FirstAidInstructions({ instructions }: FirstAidInstructionsProps
           )}
           {isLoading ? 'Loading...' : isPlaying ? 'Pause' : 'Read Aloud'}
         </Button>
-        <Select
-          onValueChange={(value) => {
-            if (isPlaying) {
-              audioRef.current?.pause();
-              setIsPlaying(false);
-            }
-            audioRef.current = null;
-            setSelectedLanguage(value as SupportedLanguage)
-          }}
-          defaultValue={selectedLanguage}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Language" />
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map((lang) => (
-              <SelectItem key={lang.value} value={lang.value}>
-                {lang.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </CardFooter>
     </Card>
   );

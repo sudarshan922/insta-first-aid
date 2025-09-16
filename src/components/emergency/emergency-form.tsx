@@ -13,11 +13,29 @@ import { FirstAidInstructions } from './first-aid-instructions';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
+import { SupportedLanguageSchema } from '@/ai/schemas/text-to-speech';
+
+const languages: { value: SupportedLanguage; label: string }[] = [
+  { value: 'en-US', label: 'English' },
+  { value: 'hi-IN', label: 'Hindi' },
+  { value: 'mr-IN', label: 'Marathi' },
+  { value: 'kn-IN', label: 'Kannada' },
+  { value: 'kok-IN', label: 'Konkani' },
+];
 
 const emergencyFormSchema = z.object({
   description: z.string().min(10, {
     message: 'Please describe the situation in at least 10 characters.',
   }),
+  language: SupportedLanguageSchema,
 });
 
 type EmergencyFormValues = z.infer<typeof emergencyFormSchema>;
@@ -25,13 +43,14 @@ type EmergencyFormValues = z.infer<typeof emergencyFormSchema>;
 export function EmergencyForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ isEmergency: boolean; instructions?: string } | null>(null);
+  const [result, setResult] = useState<{ isEmergency: boolean; instructions?: string; language: SupportedLanguage } | null>(null);
   const { toast } = useToast();
 
   const form = useForm<EmergencyFormValues>({
     resolver: zodResolver(emergencyFormSchema),
     defaultValues: {
       description: '',
+      language: 'en-US',
     },
   });
 
@@ -46,10 +65,11 @@ export function EmergencyForm() {
       if (emergencyResult.isEmergency && emergencyResult.keywords.length > 0) {
         const guidanceResult = await aiPoweredFirstAidGuidance({
           keywords: emergencyResult.keywords.join(', '),
+          language: data.language,
         });
-        setResult({ isEmergency: true, instructions: guidanceResult.instructions });
+        setResult({ isEmergency: true, instructions: guidanceResult.instructions, language: data.language });
       } else {
-        setResult({ isEmergency: false });
+        setResult({ isEmergency: false, language: data.language });
       }
     } catch (e) {
       console.error(e);
@@ -84,16 +104,42 @@ export function EmergencyForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" size="lg" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              'Get First Aid Steps'
-            )}
-          </Button>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <FormField
+              control={form.control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                    <FormControl>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Language" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang.value} value={lang.value}>
+                          {lang.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" size="lg" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                'Get First Aid Steps'
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
 
@@ -114,7 +160,7 @@ export function EmergencyForm() {
       )}
 
       {result?.isEmergency && result.instructions && (
-        <FirstAidInstructions instructions={result.instructions} />
+        <FirstAidInstructions instructions={result.instructions} language={result.language} />
       )}
     </div>
   );
