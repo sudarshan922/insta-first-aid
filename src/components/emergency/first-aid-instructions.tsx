@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   textToSpeech,
-  SupportedLanguage,
 } from '@/ai/flows/text-to-speech';
+import type { SupportedLanguage } from '@/ai/schemas/text-to-speech';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {

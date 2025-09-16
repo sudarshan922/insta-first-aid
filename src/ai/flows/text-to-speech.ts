@@ -10,32 +10,15 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import wav from 'wav';
+import {
+  TextToSpeechInputSchema,
+  TextToSpeechOutputSchema,
+  type TextToSpeechInput,
+  type TextToSpeechOutput,
+  type SupportedLanguage,
+} from '@/ai/schemas/text-to-speech';
 
-export const SupportedLanguageSchema = z.enum([
-  'en-US', // English
-  'hi-IN', // Hindi
-  'mr-IN', // Marathi
-  'kn-IN', // Kannada
-  'kok-IN', // Konkani
-]);
-export type SupportedLanguage = z.infer<typeof SupportedLanguageSchema>;
-
-const TextToSpeechInputSchema = z.object({
-  text: z.string().describe('The text to be converted to speech.'),
-  language: SupportedLanguageSchema.describe(
-    'The language of the text. Supported languages: en-US, hi-IN, mr-IN, kn-IN, kok-IN'
-  ),
-});
-export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
-
-const TextToSpeechOutputSchema = z.object({
-  audioDataUri: z
-    .string()
-    .describe(
-      "The generated audio as a data URI. Expected format: 'data:audio/wav;base64,<encoded_data>'"
-    ),
-});
-export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
+export type { TextToSpeechInput, TextToSpeechOutput, SupportedLanguage };
 
 export async function textToSpeech(
   input: TextToSpeechInput
