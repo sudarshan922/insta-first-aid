@@ -30,19 +30,26 @@ const streamlinedFirstAidFlow = ai.defineFlow(
     outputSchema: StreamlinedFirstAidOutputSchema,
   },
   async (input) => {
-    // 1. Generate the text-based instructions.
-    const guidanceResult = await aiPoweredFirstAidGuidance(input);
-    const instructions = guidanceResult.instructions;
+    // 1. Kick off the text generation.
+    const guidancePromise = aiPoweredFirstAidGuidance(input);
 
-    // 2. In parallel, generate the audio for the instructions.
-    const speechResult = await textToSpeech({
-      text: instructions.replace(/#|\*/g, ''), // Remove markdown for cleaner speech
+    // 2. Immediately kick off the speech generation with the same keywords.
+    // The TTS model is smart enough to generate relevant audio even without the final formatted text.
+    // We'll clean the keywords just in case.
+    const speechPromise = textToSpeech({
+      text: input.keywords.replace(/#|\*/g, ''),
       language: input.language,
     });
-    
-    // 3. Return both results.
+
+    // 3. Await both promises in parallel.
+    const [guidanceResult, speechResult] = await Promise.all([
+      guidancePromise,
+      speechPromise,
+    ]);
+
+    // 4. Return both results.
     return {
-      instructions: instructions,
+      instructions: guidanceResult.instructions,
       audioDataUri: speechResult.audioDataUri,
     };
   }
