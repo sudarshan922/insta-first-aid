@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -29,6 +30,7 @@ export function FirstAidInstructions({
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
         setIsPlaying(false);
       }
     };
@@ -43,6 +45,8 @@ export function FirstAidInstructions({
         } else {
             audioRef.current.play().catch(e => {
                 console.error("Audio playback failed:", e);
+                // Reset state if play fails
+                setIsPlaying(false);
             });
             setIsPlaying(true);
         }
@@ -98,15 +102,23 @@ export function FirstAidInstructions({
     <Card className="mt-8 animate-in fade-in-50 duration-500 shadow-lg border-primary/20">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="font-headline text-2xl">First Aid Steps</CardTitle>
-        <Button onClick={handlePlayPause} size="lg" disabled={!audioDataUri}>
+        <Button onClick={handlePlayPause} size="lg" disabled={isAudioLoading || !audioDataUri}>
           {isAudioLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Generating...
+            </>
           ) : isPlaying ? (
-            <Pause className="mr-2 h-5 w-5" />
+            <>
+              <Pause className="mr-2 h-5 w-5" />
+              Pause Audio
+            </>
           ) : (
-            <Volume2 className="mr-2 h-5 w-5" />
+            <>
+              <Volume2 className="mr-2 h-5 w-5" />
+              Play Audio
+            </>
           )}
-          {isAudioLoading ? 'Generating...' : isPlaying ? 'Pause Audio' : 'Play Audio'}
         </Button>
       </CardHeader>
       <CardContent className="prose prose-lg max-w-none text-foreground space-y-4">
