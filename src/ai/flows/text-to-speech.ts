@@ -8,7 +8,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
 import wav from 'wav';
 import {
   TextToSpeechInputSchema,
@@ -66,7 +65,9 @@ const textToSpeechFlow = ai.defineFlow(
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            languageCode: input.language,
+            prebuiltVoiceConfig: {
+              languageCode: input.language,
+            },
           },
         },
       },
