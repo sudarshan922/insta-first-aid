@@ -144,7 +144,7 @@ export function EmergencyForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Analyzing & Generating...
+                  Analyzing
                 </>
               ) : (
                 'Get First Aid Steps'
